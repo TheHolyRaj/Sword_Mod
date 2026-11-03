@@ -19,8 +19,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.theholyraj.rajswordmod.client.entity.AntiArmourAttackEntityRenderer;
 import net.theholyraj.rajswordmod.client.entity.CloneEntityRenderer;
-import net.theholyraj.rajswordmod.client.entity.DashProjectileRenderer;
 import net.theholyraj.rajswordmod.client.entity.GaiaProjectileRenderer;
 import net.theholyraj.rajswordmod.client.item.ModItemProperties;
 import net.theholyraj.rajswordmod.client.particle.ModParticles;
@@ -28,6 +28,7 @@ import net.theholyraj.rajswordmod.client.particle.custom.*;
 import net.theholyraj.rajswordmod.client.sound.ModSounds;
 import net.theholyraj.rajswordmod.network.ModMessages;
 import net.theholyraj.rajswordmod.world.config.ModCommonConfigs;
+import net.theholyraj.rajswordmod.world.enchantment.ModEnchantments;
 import net.theholyraj.rajswordmod.world.entity.ModEntities;
 import net.theholyraj.rajswordmod.world.item.util.ModCapabilities;
 import net.theholyraj.rajswordmod.world.item.util.ModCreativeModeTabs;
@@ -39,7 +40,7 @@ import org.slf4j.Logger;
 @Mod(SwordMod.MODID)
 public class SwordMod {
     public static final String MODID = "rajswordmod";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     public SwordMod(){
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
@@ -47,13 +48,13 @@ public class SwordMod {
         ModCreativeModeTabs.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMobEffects.register(modEventBus);
-
+        ModEnchantments.register(modEventBus);
         ModSounds.register(modEventBus);
         ModParticles.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ModCommonConfigs.SPEC, "rajswordmod-common.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ModCommonConfigs.SPEC, "TheEightRenownedBlades-common.toml");
 
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
@@ -82,8 +83,8 @@ public class SwordMod {
     public static class ClientModEvents{
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.DASH_PROJECTILE.get(), DashProjectileRenderer::new);
             EntityRenderers.register(ModEntities.GAIA_PROJECTILE.get(), GaiaProjectileRenderer::new);
+            EntityRenderers.register(ModEntities.ANTI_ARMOUR_ATTACK_ENTITY.get(), AntiArmourAttackEntityRenderer::new);
             EntityRenderers.register(ModEntities.CLONE_ENTITY.get(), CloneEntityRenderer::new);
             ModItemProperties.makeProperties();
         }
@@ -91,14 +92,22 @@ public class SwordMod {
         public static void registerParticleFactories(final RegisterParticleProvidersEvent event) {
             Minecraft.getInstance().particleEngine.register(ModParticles.DEFLECT_PARTICLES.get(),
                     DeflectParticle.Provider::new);
+            Minecraft.getInstance().particleEngine.register(ModParticles.ANTI_ARMOUR_ATTACK_PARTICLES.get(),
+                    AntiArmourAttackParticle.Provider::new);
             Minecraft.getInstance().particleEngine.register(ModParticles.HOLY_EXPLOSION_PARTICLES.get(),
                     HolyExplosionParticle.Provider::new);
             Minecraft.getInstance().particleEngine.register(ModParticles.HOLY_FIRE_PARTICLES.get(),
                     HolyFireParticle.Provider::new);
-            Minecraft.getInstance().particleEngine.register(ModParticles.ANTI_ARMOR_PARTICLES.get(),
-                    AntiArmorParticle.Provider::new);
             Minecraft.getInstance().particleEngine.register(ModParticles.GAIA_BLADE_PARTICLES.get(),
                     GaiaBladeParticle.Provider::new);
+            Minecraft.getInstance().particleEngine.register(ModParticles.SENTINEL_SHOCKWAVE_PARTICLES.get(),
+                    SentinelShockwaveParticle.Provider::new);
+            Minecraft.getInstance().particleEngine.register(ModParticles.SENTINEL_DEFENCE_PARTICLES.get(),
+                    SentinelDefenceParticle.Provider::new);
+            Minecraft.getInstance().particleEngine.register(ModParticles.KNOCKBACK_SWORD_PARTICLES.get(),
+                    KnockbackSwordParticle.Provider::new);
+            Minecraft.getInstance().particleEngine.register(ModParticles.KNOCKBACK_SUCTION_PARTICLES.get(),
+                    KnockbackSuctionParticle.Provider::new);
         }
         @SubscribeEvent
         public static void registerKeybinds(RegisterKeyMappingsEvent event){

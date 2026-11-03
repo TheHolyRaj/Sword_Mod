@@ -1,7 +1,0 @@
-{
-  "parent": "rajswordmod:item/sentinel_sword",
-  "gui_light": "front",
-  "textures": {
-    "layer0": "rajswordmod:item/sentinel_sword_ready"
-  }
-}

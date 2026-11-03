@@ -9,6 +9,21 @@
         "blocking": 1
       },
       "model": "rajswordmod:item/sentinel_sword_blocking"
+    },
+    {
+      "predicate": {
+        "upgraded": 1.0,
+        "blocking": 0.0
+      },
+      "model": "rajswordmod:item/sentinel_sword_upgraded"
+    },
+    {
+      "predicate": {
+        "upgraded": 1.0,
+        "blocking": 1.0
+      },
+      "model": "rajswordmod:item/sentinel_sword_upgraded_blocking"
     }
+
   ]
 }

@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.theholyraj.rajswordmod.world.item.ModItems;
 import net.theholyraj.rajswordmod.world.item.custom.DeflectSwordItem;
+import net.theholyraj.rajswordmod.world.item.util.upgradesword.UpgradeSwordItem;
 
 import java.util.function.Supplier;
 
@@ -30,13 +31,12 @@ public class UpgradeSwordSERVERS2CPacket {
     public boolean handle(Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
-            // Client-side processing
             Minecraft mc = Minecraft.getInstance();
             Entity entity = mc.level.getEntity(this.entityId);
             if (entity instanceof Player player) {
                 ItemStack stack = player.getMainHandItem();
-                if (stack.is(ModItems.DEFLECT_SWORD.get())) {
-                    DeflectSwordItem.setUpgraded(stack, true);
+                if (stack.getItem() instanceof UpgradeSwordItem){
+                    UpgradeSwordItem.setUpgraded(stack, true);
                 }
             }
         });

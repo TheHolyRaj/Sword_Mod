@@ -1,12 +1,12 @@
 {
   "textures": [
-    "minecraft:sweep_0",
-    "minecraft:sweep_1",
-    "minecraft:sweep_2",
-    "minecraft:sweep_3",
-    "minecraft:sweep_4",
-    "minecraft:sweep_5",
-    "minecraft:sweep_6",
-    "minecraft:sweep_7"
+    "rajswordmod:deflect_particle_0",
+    "rajswordmod:deflect_particle_1",
+    "rajswordmod:deflect_particle_2",
+    "rajswordmod:deflect_particle_3",
+    "rajswordmod:deflect_particle_4",
+    "rajswordmod:deflect_particle_5",
+    "rajswordmod:deflect_particle_6",
+    "rajswordmod:deflect_particle_7"
   ]
 }

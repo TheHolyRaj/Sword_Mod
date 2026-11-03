@@ -8,6 +8,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.theholyraj.rajswordmod.SwordMod;
+import net.theholyraj.rajswordmod.world.entity.custom.AntiArmourAttackEntity;
 import net.theholyraj.rajswordmod.world.entity.custom.CloneEntity;
 import net.theholyraj.rajswordmod.world.entity.custom.DashProjectileEntity;
 import net.theholyraj.rajswordmod.world.entity.custom.GaiaProjectileEntity;
@@ -28,13 +29,18 @@ public class ModEntities {
             ENTITY_TYPES.register("gaia_projectile",
                     () -> EntityType.Builder.<GaiaProjectileEntity>of(GaiaProjectileEntity::new, MobCategory.MISC)
                             .sized(0.8f, 0.3f)
-                            .clientTrackingRange(4)
-                            .updateInterval(20)
+                            .clientTrackingRange(64)
+                            .updateInterval(1)
+                            .setShouldReceiveVelocityUpdates(true)
                             .build("gaia_projectile"));
 
     public static final RegistryObject<EntityType<CloneEntity>>CLONE_ENTITY =
             ENTITY_TYPES.register("clone_entity", ()-> EntityType.Builder.of(CloneEntity::new, MobCategory.MISC)
                     .sized(1,2).build("clone_entity"));
+
+    public static final RegistryObject<EntityType<AntiArmourAttackEntity>>ANTI_ARMOUR_ATTACK_ENTITY =
+            ENTITY_TYPES.register("anti_armour_attack_entity", ()-> EntityType.Builder.of(AntiArmourAttackEntity::new, MobCategory.MISC)
+                    .sized(2f,1.5f).build("anti_armour_attack_entity"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

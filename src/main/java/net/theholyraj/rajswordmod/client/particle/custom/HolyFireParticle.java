@@ -19,22 +19,21 @@ public class HolyFireParticle extends TextureSheetParticle {
     }
 
     public float getQuadSize(float pScaleFactor) {
-        float f = ((float)this.age + pScaleFactor) / (float)this.lifetime;
-        return this.quadSize * (1.0F - f * f * 0.5F);
+        float lifetimeProgress = ((float)this.age + pScaleFactor) / (float)this.lifetime;
+        return this.quadSize * (1.0F - lifetimeProgress * lifetimeProgress * 0.5F);
     }
 
     public int getLightColor(float pPartialTick) {
-        float f = ((float)this.age + pPartialTick) / (float)this.lifetime;
-        f = Mth.clamp(f, 0.0F, 1.0F);
-        int i = super.getLightColor(pPartialTick);
-        int j = i & 255;
-        int k = i >> 16 & 255;
-        j += (int)(f * 15.0F * 16.0F);
-        if (j > 240) {
-            j = 240;
+        float lifetimeProgress = ((float)this.age + pPartialTick) / (float)this.lifetime;
+        lifetimeProgress = Mth.clamp(lifetimeProgress, 0.0F, 1.0F);
+        int lightColor = super.getLightColor(pPartialTick);
+        int blockLight = lightColor & 255;
+        int skyLight = lightColor >> 16 & 255;
+        blockLight += (int)(lifetimeProgress * 15.0F * 16.0F);
+        if (blockLight > 240) {
+            blockLight = 240;
         }
-
-        return j | k << 16;
+        return blockLight | skyLight << 16;
     }
 
     @OnlyIn(Dist.CLIENT)

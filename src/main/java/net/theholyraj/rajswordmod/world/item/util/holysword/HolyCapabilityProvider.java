@@ -9,29 +9,49 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.theholyraj.rajswordmod.world.item.util.ModCapabilities;
 import net.theholyraj.rajswordmod.world.item.util.bloodsword.BloodSwordData;
 import net.theholyraj.rajswordmod.world.item.util.bloodsword.IBloodSwordData;
+import net.theholyraj.rajswordmod.world.item.util.upgradesword.IUpgradeSwordData;
+import net.theholyraj.rajswordmod.world.item.util.upgradesword.UpgradeSwordData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 
 public class HolyCapabilityProvider  implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    private final IHolySwordData instance = new HolySwordData();
+    private final IHolySwordData holyInstance = new HolySwordData();
+    private final IUpgradeSwordData upgradeInstance = new UpgradeSwordData();
+
+    private final LazyOptional<IHolySwordData> holyOptional = LazyOptional.of(() -> holyInstance);
+    private final LazyOptional<IUpgradeSwordData> upgradeOptional = LazyOptional.of(() -> upgradeInstance);
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        return cap == ModCapabilities.HOLY_DATA_CAPABILITY ? LazyOptional.of(() -> instance).cast() : LazyOptional.empty();
+        if (cap == ModCapabilities.HOLY_DATA_CAPABILITY) {
+            return holyOptional.cast();
+        }
+        if (cap == ModCapabilities.UPGRADE_DATA_CAPABILITY) {
+            return upgradeOptional.cast();
+        }
+        return LazyOptional.empty();
     }
+
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
-        instance.writeToNBT(nbt);
+        holyInstance.writeToNBT(nbt);
+
+        CompoundTag upgradeTag = new CompoundTag();
+        upgradeInstance.writeToNBT(upgradeTag);
+        nbt.put("upgrade_data", upgradeTag);
+
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        instance.readFromNBT(nbt);
+        holyInstance.readFromNBT(nbt);
+        if (nbt.contains("upgrade_data")) {
+            upgradeInstance.readFromNBT(nbt.getCompound("upgrade_data"));
+        }
     }
-
 }

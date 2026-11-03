@@ -22,5 +22,35 @@
     "sounds": [
       "rajswordmod:charge_knockback"
     ]
+  },
+  "holy_explosion": {
+    "subtitle": "sounds.rajswordmod.holy_explosion",
+    "sounds": [
+      "rajswordmod:holy_explosion"
+    ]
+  },
+  "sentinel_activation": {
+    "subtitle": "sounds.rajswordmod.sentinel_activation",
+    "sounds": [
+      "rajswordmod:sentinel_activation"
+    ]
+  },
+  "gaia_swing": {
+    "subtitle": "sounds.rajswordmod.gaia_swing",
+    "sounds": [
+      "rajswordmod:gaia_swing"
+    ]
+  },
+  "gaia_hit": {
+    "subtitle": "sounds.rajswordmod.gaia_hit",
+    "sounds": [
+      "rajswordmod:gaia_hit"
+    ]
+  },
+  "anti_armour_charge": {
+    "subtitle": "sounds.rajswordmod.anti_armour_charge",
+    "sounds": [
+      "rajswordmod:anti_armour_charge"
+    ]
   }
 }

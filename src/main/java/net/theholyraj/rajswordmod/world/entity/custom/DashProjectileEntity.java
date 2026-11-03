@@ -60,27 +60,23 @@ public class DashProjectileEntity extends Projectile {
             this.remove(RemovalReason.DISCARDED);
         }
 
-        Vec3 vec3 = this.getDeltaMovement();
+        Vec3 deltaMovement = this.getDeltaMovement();
         HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         if (hitresult.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hitresult))
             this.onHit(hitresult);
 
-        double d0 = this.getX() + vec3.x;
-        double d1 = this.getY() + vec3.y;
-        double d2 = this.getZ() + vec3.z;
+        double nextX = this.getX() + deltaMovement.x;
+        double nextY = this.getY() + deltaMovement.y;
+        double nextZ = this.getZ() + deltaMovement.z;
         this.updateRotation();
-
-        double d5 = vec3.x;
-        double d6 = vec3.y;
-        double d7 = vec3.z;
 
         if (this.level().getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir)) {
             this.discard();
         } else if (this.isInWaterOrBubble()) {
             this.discard();
         } else {
-            this.setDeltaMovement(vec3.scale(0.99F));
-            this.setPos(d0, d1, d2);
+            this.setDeltaMovement(deltaMovement.scale(0.99F));
+            this.setPos(nextX, nextY, nextZ);
         }
     }
 

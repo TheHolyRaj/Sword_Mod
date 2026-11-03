@@ -10,15 +10,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class DeflectParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    DeflectParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pQuadSizeMultiplier, SpriteSet pSprites) {
+    public DeflectParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pQuadSizeMultiplier, SpriteSet pSprites) {
         super(pLevel, pX, pY, pZ, 0.0D, 0.0D, 0.0D);
         this.sprites = pSprites;
         this.lifetime = 4;
-        float f = this.random.nextFloat() * 0.6F + 0.4F;
-        this.rCol = f;
-        this.gCol = f;
-        this.bCol = f;
-        this.quadSize = 0.5F ;//- (float)pQuadSizeMultiplier * 0.5F;
+        float f = this.random.nextFloat() * 0.3F + 0.7F;
+        this.rCol = 0.9F * f;
+        this.gCol = 0.75F * f;
+        this.bCol = 1.0F * f;
+        this.quadSize = 0.5F;
         this.setSpriteFromAge(pSprites);
     }
 

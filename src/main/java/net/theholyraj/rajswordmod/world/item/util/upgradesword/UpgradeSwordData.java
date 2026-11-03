@@ -7,7 +7,9 @@ public class UpgradeSwordData implements IUpgradeSwordData{
     private boolean upgraded;
 
     @Override
-    public void setData(int data) {this.data=data;}
+    public void setData(int data) {
+        this.data=data;
+    }
 
     @Override
     public int getData() {return data;}

@@ -4,8 +4,8 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class HolyFireEffectInstance extends MobEffectInstance {
-    public HolyFireEffectInstance(MobEffect pEffect, int duration) {
-        super(pEffect, duration);
+    public HolyFireEffectInstance(MobEffect pEffect, int duration, int amplifier) {
+        super(pEffect, duration, amplifier);
     }
 
     @Override

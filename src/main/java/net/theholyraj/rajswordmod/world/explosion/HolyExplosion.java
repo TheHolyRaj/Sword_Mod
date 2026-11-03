@@ -55,8 +55,6 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid = SwordMod.MODID)
 public class HolyExplosion extends Explosion {
     private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new ExplosionDamageCalculator();
-    private static final int MAX_DROPS_PER_COMBINED_STACK = 16;
-    private final RandomSource random = RandomSource.create();
     private final Level level;
     private final double x;
     private final double y;
@@ -67,9 +65,9 @@ public class HolyExplosion extends Explosion {
     private final DamageSource damageSource;
     private final ExplosionDamageCalculator damageCalculator;
     private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
-    private final Map<Player, Vec3> hitPlayers = Maps.newHashMap();
-    private final Vec3 position;
-    public HolyExplosion(Level world, Entity entity, double x, double y, double z, float size) {
+    private final boolean isUpgraded;
+
+    public HolyExplosion(Level world, Entity entity, double x, double y, double z, float size, boolean isUpgraded) {
         super(world, entity, x, y, z, size, false, BlockInteraction.KEEP);
         this.level = world;
         this.source = entity;
@@ -79,59 +77,13 @@ public class HolyExplosion extends Explosion {
         this.z = z;
         this.damageSource = world.damageSources().source(DamageSources.HOLY);
         this.damageCalculator = EXPLOSION_DAMAGE_CALCULATOR;
-        this.position = new Vec3(this.x, this.y, this.z);
+        this.isUpgraded = isUpgraded;
     }
 
 
     @Override
     public void explode() {
         this.level.gameEvent(this.source, GameEvent.EXPLODE, new Vec3(this.x, this.y, this.z));
-        Set<BlockPos> set = Sets.newHashSet();
-        int i = 16;
-
-        for(int j = 0; j < 16; ++j) {
-            for(int k = 0; k < 16; ++k) {
-                for(int l = 0; l < 16; ++l) {
-                    if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
-                        double d0 = (double)((float)j / 15.0F * 2.0F - 1.0F);
-                        double d1 = (double)((float)k / 15.0F * 2.0F - 1.0F);
-                        double d2 = (double)((float)l / 15.0F * 2.0F - 1.0F);
-                        double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                        d0 /= d3;
-                        d1 /= d3;
-                        d2 /= d3;
-                        float f = this.radius * (0.7F + this.level.random.nextFloat() * 0.6F);
-                        double d4 = this.x;
-                        double d6 = this.y;
-                        double d8 = this.z;
-
-                        for(float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
-                            BlockPos blockpos = BlockPos.containing(d4, d6, d8);
-                            BlockState blockstate = this.level.getBlockState(blockpos);
-                            FluidState fluidstate = this.level.getFluidState(blockpos);
-                            if (!this.level.isInWorldBounds(blockpos)) {
-                                break;
-                            }
-
-                            Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(this, this.level, blockpos, blockstate, fluidstate);
-                            if (optional.isPresent()) {
-                                f -= (optional.get() + 0.3F) * 0.3F;
-                            }
-
-                            if (f > 0.0F && this.damageCalculator.shouldBlockExplode(this, this.level, blockpos, blockstate, f)) {
-                                set.add(blockpos);
-                            }
-
-                            d4 += d0 * (double)0.3F;
-                            d6 += d1 * (double)0.3F;
-                            d8 += d2 * (double)0.3F;
-                        }
-                    }
-                }
-            }
-        }
-
-        this.toBlow.addAll(set);
         float f2 = this.radius * 2.0F;
         int k1 = Mth.floor(this.x - (double)f2 - 1.0D);
         int l1 = Mth.floor(this.x + (double)f2 + 1.0D);
@@ -168,12 +120,14 @@ public class HolyExplosion extends Explosion {
 
     @Override
     public void finalizeExplosion(boolean spawnParticles) {
-        if (spawnParticles) {
-            if (this.level instanceof ServerLevel) {
-                ServerLevel serverLevel = (ServerLevel) this.level;
-                serverLevel.playSound(null,this.x, this.y, this.z,SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 4.0F, (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat())));
-                serverLevel.sendParticles(ModParticles.HOLY_EXPLOSION_PARTICLES.get(), this.x, this.y, this.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            }
+        if (spawnParticles && this.level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ModParticles.HOLY_EXPLOSION_PARTICLES.get(),
+                    this.x, this.y, this.z, 0, this.radius, 0.0D, 0.0D, 1.0D);
+
+            serverLevel.playSound(null, this.x, this.y, this.z,
+                    SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 2.0F, 1.0F);
+            serverLevel.playSound(null, this.x, this.y, this.z,
+                    ModSounds.HOLY_EXPLOSION.get(), SoundSource.BLOCKS, 2.0F, 1.0F);
         }
     }
 
@@ -184,19 +138,27 @@ public class HolyExplosion extends Explosion {
 
     /////////////////////////////////////////////////////////EVENT//////////////////////
     @SubscribeEvent
-    public static void undeadDamageEvent(ExplosionEvent.Detonate event){
-        if (event.getExplosion() instanceof HolyExplosion){
-            List<Entity> entities= event.getAffectedEntities();
-            entities.removeIf(mob-> !(mob instanceof LivingEntity entity));
-            entities.removeIf(mob-> mob instanceof LivingEntity entity && entity.getMobType() != MobType.UNDEAD);
-            for (Entity entity:entities){
-                if (entity instanceof WitherBoss witherBoss){
-                    HolyFireEffectInstance effectInstance = new HolyFireEffectInstance(ModMobEffects.HOLY_FIRE.get(),ModCommonConfigs.HOLY_FIRE_DURATION.get());
-                    witherBoss.forceAddEffect(effectInstance,witherBoss);
+    public static void undeadDamageEvent(ExplosionEvent.Detonate event) {
+        if (event.getExplosion() instanceof HolyExplosion explosion) {
+            List<Entity> entities = event.getAffectedEntities();
+            entities.removeIf(mob -> !(mob instanceof LivingEntity entity));
+            entities.removeIf(mob -> mob instanceof LivingEntity entity && entity.getMobType() != MobType.UNDEAD);
+            for (Entity entity : entities) {
+                if (entity instanceof WitherBoss witherBoss) {
+                    int power = 1;
+                    if (explosion.isUpgraded) {
+                        power = 2;
+                    }
+                    HolyFireEffectInstance effectInstance = new HolyFireEffectInstance(ModMobEffects.HOLY_FIRE.get(), ModCommonConfigs.HOLY_FIRE_DURATION.get(), power);
+                    witherBoss.forceAddEffect(effectInstance, witherBoss);
                 }
-                if (entity instanceof LivingEntity livingEntity){
-                    if (livingEntity.getMobType() == MobType.UNDEAD){
-                        livingEntity.addEffect(new HolyFireEffectInstance(ModMobEffects.HOLY_FIRE.get(), ModCommonConfigs.HOLY_FIRE_DURATION.get()));
+                if (entity instanceof LivingEntity livingEntity) {
+                    if (livingEntity.getMobType() == MobType.UNDEAD) {
+                        int power = 1;
+                        if (explosion.isUpgraded) {
+                            power = 2;
+                        }
+                        livingEntity.addEffect(new HolyFireEffectInstance(ModMobEffects.HOLY_FIRE.get(), ModCommonConfigs.HOLY_FIRE_DURATION.get(), power));
                     }
                 }
             }

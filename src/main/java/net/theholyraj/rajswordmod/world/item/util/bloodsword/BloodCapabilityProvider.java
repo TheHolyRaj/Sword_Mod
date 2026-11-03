@@ -15,31 +15,34 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 
 public class BloodCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    private final IBloodSwordData instance = new BloodSwordData();
-    private final IUpgradeSwordData instance2 = new UpgradeSwordData();
+    private final IBloodSwordData bloodInstance = new BloodSwordData();
 
+    private final LazyOptional<IBloodSwordData> bloodOptional = LazyOptional.of(() -> bloodInstance);
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (cap == ModCapabilities.BLOOD_DATA_CAPABILITY) {
-            return LazyOptional.of(() -> instance).cast();
-        } else if (cap == ModCapabilities.UPGRADE_DATA_CAPABILITY) {
-            return LazyOptional.of(() -> instance2).cast();
-        } else {
-            return LazyOptional.empty();
+            return bloodOptional.cast();
         }
+        return LazyOptional.empty();
     }
+
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
-        instance.writeToNBT(nbt);
+
+        CompoundTag bloodTag = new CompoundTag();
+        bloodInstance.writeToNBT(bloodTag);
+        nbt.put("blood_data", bloodTag);
+
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        instance.readFromNBT(nbt);
+        if (nbt.contains("blood_data")) {
+            bloodInstance.readFromNBT(nbt.getCompound("blood_data"));
+        }
     }
-
 }

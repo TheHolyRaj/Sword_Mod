@@ -4,59 +4,25 @@
     "layer0": "rajswordmod:item/blood_sword"
   },
   "overrides": [
-    {
-      "predicate": {
-        "blood": 1
-      },
-      "model": "rajswordmod:item/blood_sword_1"
-    },
-    {
-      "predicate": {
-        "blood": 2
-      },
-      "model": "rajswordmod:item/blood_sword_2"
-    },
-    {
-      "predicate": {
-        "blood": 3
-      },
-      "model": "rajswordmod:item/blood_sword_3"
-    },
-    {
-      "predicate": {
-        "blood": 4
-      },
-      "model": "rajswordmod:item/blood_sword_4"
-    },
-    {
-      "predicate": {
-        "blood": 5
-      },
-      "model": "rajswordmod:item/blood_sword_5"
-    },
-    {
-      "predicate": {
-        "blood": 6
-      },
-      "model": "rajswordmod:item/blood_sword_6"
-    },
-    {
-      "predicate": {
-        "blood": 7
-      },
-      "model": "rajswordmod:item/blood_sword_7"
-    },
-    {
-      "predicate": {
-        "blood": 8
-      },
-      "model": "rajswordmod:item/blood_sword_8"
-    },
-    {
-      "predicate": {
-        "blood": 9
-      },
-      "model": "rajswordmod:item/blood_sword_9"
-    }
+    { "predicate": { "upgraded": 0.0, "blood": 1 }, "model": "rajswordmod:item/blood_sword_1" },
+    { "predicate": { "upgraded": 0.0, "blood": 2 }, "model": "rajswordmod:item/blood_sword_2" },
+    { "predicate": { "upgraded": 0.0, "blood": 3 }, "model": "rajswordmod:item/blood_sword_3" },
+    { "predicate": { "upgraded": 0.0, "blood": 4 }, "model": "rajswordmod:item/blood_sword_4" },
+    { "predicate": { "upgraded": 0.0, "blood": 5 }, "model": "rajswordmod:item/blood_sword_5" },
+    { "predicate": { "upgraded": 0.0, "blood": 6 }, "model": "rajswordmod:item/blood_sword_6" },
+    { "predicate": { "upgraded": 0.0, "blood": 7 }, "model": "rajswordmod:item/blood_sword_7" },
+    { "predicate": { "upgraded": 0.0, "blood": 8 }, "model": "rajswordmod:item/blood_sword_8" },
+    { "predicate": { "upgraded": 0.0, "blood": 9 }, "model": "rajswordmod:item/blood_sword_9" },
+
+    { "predicate": { "upgraded": 1.0 }, "model": "rajswordmod:item/blood_sword_upgraded" },
+    { "predicate": { "upgraded": 1.0, "blood": 1 }, "model": "rajswordmod:item/blood_sword_upgraded_1" },
+    { "predicate": { "upgraded": 1.0, "blood": 2 }, "model": "rajswordmod:item/blood_sword_upgraded_2" },
+    { "predicate": { "upgraded": 1.0, "blood": 3 }, "model": "rajswordmod:item/blood_sword_upgraded_3" },
+    { "predicate": { "upgraded": 1.0, "blood": 4 }, "model": "rajswordmod:item/blood_sword_upgraded_4" },
+    { "predicate": { "upgraded": 1.0, "blood": 5 }, "model": "rajswordmod:item/blood_sword_upgraded_5" },
+    { "predicate": { "upgraded": 1.0, "blood": 6 }, "model": "rajswordmod:item/blood_sword_upgraded_6" },
+    { "predicate": { "upgraded": 1.0, "blood": 7 }, "model": "rajswordmod:item/blood_sword_upgraded_7" },
+    { "predicate": { "upgraded": 1.0, "blood": 8 }, "model": "rajswordmod:item/blood_sword_upgraded_8" },
+    { "predicate": { "upgraded": 1.0, "blood": 9 }, "model": "rajswordmod:item/blood_sword_upgraded_9" }
   ]
 }

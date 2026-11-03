@@ -9,14 +9,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class HolyExplosionParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    protected HolyExplosionParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pQuadSizeMultiplier, SpriteSet pSprites) {
+    protected HolyExplosionParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pRadius, SpriteSet pSprites) {
         super(pLevel, pX, pY, pZ, 0.0D, 0.0D, 0.0D);
         this.lifetime = 6 + this.random.nextInt(4);
         this.rCol = 1f;
         this.gCol = 1f;
         this.bCol = 0.7f;
-        this.quadSize = 6.0F * (1.0F - (float)pQuadSizeMultiplier * 0.5F);
         this.sprites = pSprites;
+
+        float damageRadius = (float) pRadius * 2.0f;
+        this.quadSize = damageRadius;
+
         this.setSpriteFromAge(pSprites);
     }
 

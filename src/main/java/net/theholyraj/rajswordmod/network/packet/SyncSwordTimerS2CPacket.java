@@ -2,6 +2,7 @@ package net.theholyraj.rajswordmod.network.packet;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
@@ -16,7 +17,7 @@ public class SyncSwordTimerS2CPacket {
 
     public SyncSwordTimerS2CPacket(int remainingTime, int slot) {
         this.remainingTime = remainingTime;
-        this.slot = slot;  // The slot the item is in
+        this.slot = slot;
     }
 
     public SyncSwordTimerS2CPacket(FriendlyByteBuf buf) {
@@ -34,9 +35,7 @@ public class SyncSwordTimerS2CPacket {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
                 ItemStack stack = player.getInventory().getItem(msg.slot);
-                if (stack.getItem() instanceof DeflectSwordItem) {
-                    UpgradeSwordTimer.setUpgradeTimer(stack, msg.remainingTime);
-                }
+                UpgradeSwordTimer.setUpgradeTimer(stack, msg.remainingTime);
             }
         });
         ctx.get().setPacketHandled(true);

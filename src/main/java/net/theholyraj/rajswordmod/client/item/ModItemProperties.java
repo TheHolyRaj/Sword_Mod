@@ -4,11 +4,13 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.fml.common.Mod;
 import net.theholyraj.rajswordmod.world.config.ModCommonConfigs;
 import net.theholyraj.rajswordmod.world.item.ModItems;
 import net.theholyraj.rajswordmod.world.item.custom.BloodGorgerSwordItem;
 import net.theholyraj.rajswordmod.world.item.util.ModCapabilities;
 import net.theholyraj.rajswordmod.world.item.util.upgradesword.UpgradeCapabilityProvider;
+import net.theholyraj.rajswordmod.world.item.util.upgradesword.UpgradeSwordItem;
 
 public class ModItemProperties {
     public static void makeProperties() {
@@ -19,6 +21,15 @@ public class ModItemProperties {
         registerCustomProperty(ModItems.BLOOD_SWORD.get());
 
         makeUpgradingItem(ModItems.DEFLECT_SWORD.get());
+        makeUpgradingItem(ModItems.SENTINEL_SWORD.get());
+        makeUpgradingItem(ModItems.KNOCKBACK_SWORD.get());
+        makeUpgradingItem(ModItems.HOLY_SWORD.get());
+        makeUpgradingItem(ModItems.GAIA_SWORD.get());
+        makeUpgradingItem(ModItems.ANTI_ARMOR_SWORD.get());
+        makeUpgradingItem(ModItems.BLOOD_SWORD.get());
+        makeUpgradingItem(ModItems.SHADOW_CLONE_SWORD.get());
+
+
     }
 
 
@@ -30,13 +41,30 @@ public class ModItemProperties {
     private static void makeUpgradingItem(Item item){
         ItemProperties.register(item, new ResourceLocation("upgraded"),
                 (stack, level, entity, seed) -> {
-            if (stack.is(ModItems.DEFLECT_SWORD.get())) {
-                // Check if the player has the custom capability
+            if (stack.getItem() instanceof UpgradeSwordItem && !(stack.getItem() instanceof BloodGorgerSwordItem)) {
+
                 return stack.getCapability(ModCapabilities.UPGRADE_DATA_CAPABILITY)
-                        .map(cap -> cap.isUpgraded() ? 1.0F : 0.0F) // Return 1.0F if true, 0.0F if false
-                        .orElse(0.0F); // Default to 0.0F if capability is not present
+                        .map(cap -> cap.isUpgraded() ? 1.0F : 0.0F)
+                        .orElse(0.0F);
             }
-            return 0.0F; // Default to 0.0F if no entity or incorrect entity type
+            else if (stack.is(ModItems.SENTINEL_SWORD.get())){
+
+                return stack.getCapability(ModCapabilities.UPGRADE_DATA_CAPABILITY)
+                        .map(cap -> cap.isUpgraded() ? 1.0F : 0.0F)
+                        .orElse(0.0F);
+            }
+            else if (stack.is(ModItems.KNOCKBACK_SWORD.get())){
+
+                return stack.getCapability(ModCapabilities.UPGRADE_DATA_CAPABILITY)
+                        .map(cap -> cap.isUpgraded() ? 1.0F : 0.0F)
+                        .orElse(0.0F);
+            }
+            else if (stack.is(ModItems.BLOOD_SWORD.get())){
+                return stack.getCapability(ModCapabilities.BLOOD_DATA_CAPABILITY)
+                        .map(cap -> cap.isUpgraded() ? 1.0F : 0.0F)
+                        .orElse(0.0F);
+            }
+            return 0.0F;
         });
 
     }

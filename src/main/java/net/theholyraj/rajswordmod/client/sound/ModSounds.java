@@ -13,16 +13,17 @@ public class ModSounds {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
             DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, SwordMod.MODID);
 
-    public static final RegistryObject<SoundEvent> SWITCH = registerSoundEvents("switch");
-
     public static final RegistryObject<SoundEvent> PROJECTILE_SLASH = registerSoundEvents("projectile_slash");
-
-    public static final RegistryObject<SoundEvent> BLOCK_DAMAGE = registerSoundEvents("block_damage");
 
     public static final RegistryObject<SoundEvent> CHARGE_KNOCKBACK = registerSoundEvents("charge_knockback");
 
+    public static final RegistryObject<SoundEvent> HOLY_EXPLOSION = registerSoundEvents("holy_explosion");
 
+    public static final RegistryObject<SoundEvent> GAIA_SWING = registerSoundEvents("gaia_swing");
 
+    public static final RegistryObject<SoundEvent> GAIA_HIT = registerSoundEvents("gaia_hit");
+
+    public static final RegistryObject<SoundEvent> ANTI_ARMOUR_CHARGE = registerSoundEvents("anti_armour_charge");
 
     private static RegistryObject<SoundEvent> registerSoundEvents(String name) {
         ResourceLocation id = new ResourceLocation(SwordMod.MODID, name);

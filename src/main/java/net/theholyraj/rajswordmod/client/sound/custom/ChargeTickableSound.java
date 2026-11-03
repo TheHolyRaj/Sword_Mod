@@ -13,33 +13,24 @@ import net.theholyraj.rajswordmod.client.sound.ModSounds;
 import net.theholyraj.rajswordmod.world.item.ModItems;
 
 public class ChargeTickableSound extends AbstractTickableSoundInstance {
-
     private final Player player;
 
     public ChargeTickableSound(float volume, Player player) {
-        super(ModSounds.CHARGE_KNOCKBACK.get(),SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
+        super(ModSounds.CHARGE_KNOCKBACK.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
         this.player = player;
-        this.looping = false; // Set to true if the sound should loop
-        this.delay = 0; // No delay
         this.volume = volume;
         this.pitch = volume;
+        this.looping = false;
+        this.delay = 0;
+        this.relative = true;
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
     }
-
     @Override
     public void tick() {
-        if (player.isAlive() && player.getMainHandItem().is(ModItems.KNOCKBACK_SWORD.get()) && player.isUsingItem()) {
-            // Update sound position to player position
-            this.x = (float) player.getX();
-            this.y = (float) player.getY();
-            this.z = (float) player.getZ();
-        } else {
-            // Stop the sound if the player is not alive
+        if (this.player.isRemoved() || !this.player.isUsingItem()) {
             this.stop();
         }
-    }
-
-    @Override
-    public boolean isStopped() {
-        return !player.isAlive()||!player.isUsingItem();
     }
 }

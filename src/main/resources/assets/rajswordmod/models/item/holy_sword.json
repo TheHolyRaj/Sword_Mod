@@ -2,5 +2,13 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "rajswordmod:item/holy_sword"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "upgraded": 1.0
+      },
+      "model": "rajswordmod:item/holy_sword_upgraded"
+    }
+  ]
 }

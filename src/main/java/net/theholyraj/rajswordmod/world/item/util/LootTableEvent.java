@@ -90,7 +90,7 @@ public class LootTableEvent {
         LootPool pool = LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(item)
-                        .setWeight(weight) // Adjust weight for rarity
+                        .setWeight(weight)
                         .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 1.0F))))
                 .build();
 

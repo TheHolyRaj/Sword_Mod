@@ -1,7 +1,9 @@
 package net.theholyraj.rajswordmod.world.entity.custom;
 
-import net.minecraft.core.BlockPos;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -10,189 +12,211 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.network.NetworkHooks;
-import net.theholyraj.rajswordmod.client.particle.ModParticles;
+import net.theholyraj.rajswordmod.client.sound.ModSounds;
 import net.theholyraj.rajswordmod.world.config.ModCommonConfigs;
 import net.theholyraj.rajswordmod.world.entity.ModEntities;
+import net.theholyraj.rajswordmod.world.item.ModItems;
 import net.theholyraj.rajswordmod.world.item.custom.GaiaBladeItem;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class GaiaProjectileEntity extends Projectile {
-    private static final EntityDataAccessor<Boolean> HIT =
-            SynchedEntityData.defineId(GaiaProjectileEntity.class, EntityDataSerializers.BOOLEAN);
-    private final float swordDamage;
-    private final Map<Enchantment, Integer> swordEnchantments;
-    private final Level level;
+public class GaiaProjectileEntity extends AbstractArrow {
+    private static final EntityDataAccessor<Boolean> IS_RETURNING = SynchedEntityData.defineId(GaiaProjectileEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_UPGRADED = SynchedEntityData.defineId(GaiaProjectileEntity.class, EntityDataSerializers.BOOLEAN);
     private final Set<Entity> piercedEntities = new HashSet<>();
+    private float swordDamage;
+    private Vec3 flightDirection = Vec3.ZERO;
+    private Vec3 lastHitPos = Vec3.ZERO;
+    public boolean isUpgraded;
 
-
-    public GaiaProjectileEntity(EntityType<? extends Projectile> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
-        this.swordDamage = 0;
-        this.swordEnchantments = new HashMap<>();
-        this.level = pLevel;
-    }
-    public GaiaProjectileEntity(Level pLevel, Player player, ItemStack sword) {
-        super(ModEntities.GAIA_PROJECTILE.get(), pLevel);
-        setOwner(player);
-        this.swordEnchantments = EnchantmentHelper.getEnchantments(sword);
-        this.swordDamage = ((GaiaBladeItem) sword.getItem()).getDamage()+1;
-        this.level=pLevel;
-
-        Vec3 blockpos = player.position();
-        double d0 = blockpos.x() ;
-        double d1 = blockpos.y() + 1.75D;
-        double d2 = blockpos.z() ;
-        this.moveTo(d0, d1, d2, this.getYRot(), this.getXRot());
-        Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.scale(0.5));
+    public GaiaProjectileEntity(EntityType<? extends AbstractArrow> type, Level level) {
+        super(type, level);
     }
 
-    @Override
-    public void tick() {
-        super.tick();
+    public GaiaProjectileEntity(Level level, Player player, ItemStack sword, float speed) {
+        super(ModEntities.GAIA_PROJECTILE.get(), level);
+        this.setOwner(player);
+        this.setNoGravity(true);
+        this.isUpgraded = GaiaBladeItem.isUpgraded(sword);
+        this.entityData.set(IS_UPGRADED, this.isUpgraded);
 
-        if (this.tickCount >= 23) {
-            this.remove(RemovalReason.DISCARDED);
-        }
-        if (this.level().isClientSide) {
-            // Define the number of particles
-            int particleCount = 2;
-
-            // Spawn particles around the projectile
-            for (int i = 0; i < particleCount; i++) {
-                double offsetX = (this.random.nextDouble() - 0.5) * this.getBbWidth();
-                double offsetY = (this.random.nextDouble() - 0.5) * this.getBbHeight();
-                double offsetZ = (this.random.nextDouble() - 0.5) * this.getBbWidth();
-
-                this.level().addParticle(ModParticles.GAIA_BLADE_PARTICLES.get(),
-                        this.getX() + offsetX,
-                        this.getY() + offsetY,
-                        this.getZ() + offsetZ,
-                        0, 0, 0);
+        double attributeDamage = 0;
+        var modifiers = sword.getAttributeModifiers(EquipmentSlot.MAINHAND);
+        if (modifiers.containsKey(Attributes.ATTACK_DAMAGE)) {
+            for (AttributeModifier modifier : modifiers.get(Attributes.ATTACK_DAMAGE)) {
+                attributeDamage += modifier.getAmount();
             }
         }
 
-        Vec3 vec3 = this.getDeltaMovement();
-        HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-        if (hitresult.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hitresult))
-            this.onHit(hitresult);
-        if (this.level().getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir) && !this.level().getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isSolid) ) {
-            this.discard();
-        }
+        float totalBase = (float) attributeDamage + 1.0F;
+        float enchantmentBonus = EnchantmentHelper.getDamageBonus(sword, player.getMobType());
+        float configMult = ModCommonConfigs.GAIA_BLADE_PROJECTILE_DAMAGE_PERCENTAGE.get().floatValue();
+        this.swordDamage = (totalBase + enchantmentBonus) * configMult;
 
-        if (!this.level.isClientSide) {
-            AABB boundingBox = this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D);
-            List<Entity> entities = this.level.getEntities(this, boundingBox, this::canHitEntity);
+        Vec3 look = player.getLookAngle();
+        this.setPos(player.getX(), player.getEyeY() - 0.3D, player.getZ());
+        this.flightDirection = look.scale(speed);
 
-            for (Entity entity : entities) {
-                if (!this.piercedEntities.contains(entity)) {
-                    this.onHitEntity(new EntityHitResult(entity));
-                }
-            }
-        }
-
-
-        double d0 = this.getX() + vec3.x;
-        double d1 = this.getY() + vec3.y;
-        double d2 = this.getZ() + vec3.z;
-        this.updateRotation();
-
-        this.setDeltaMovement(vec3.scale(0.9F));
-        this.setPos(d0, d1, d2);
-
-
-    }
-
-    @Override
-    protected void onHitEntity(EntityHitResult hitResult) {
-        Entity hitEntity = hitResult.getEntity();
-        Entity owner = this.getOwner();
-        if(hitEntity == owner && this.level().isClientSide()) {
-            return;
-        }
-        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.NEUTRAL,
-                2F, 1F);
-        float totalDamage = swordDamage;
-        if (swordEnchantments.containsKey(Enchantments.SHARPNESS)) {
-            int sharpnessLevel = swordEnchantments.get(Enchantments.SHARPNESS);
-            totalDamage += 0.5F * sharpnessLevel + 0.5F;
-        }
-        if (!this.piercedEntities.contains(hitEntity)) {
-            this.piercedEntities.add(hitEntity);
-            super.onHitEntity(hitResult);
-            LivingEntity livingentity = owner instanceof LivingEntity ? (LivingEntity)owner : null;
-            totalDamage=totalDamage* (ModCommonConfigs.GAIA_BLADE_PROJECTILE_DAMAGE_PERCENTAGE.get());
-            hitEntity.hurt(this.damageSources().mobProjectile(this, livingentity), totalDamage);        }
-
-    }
-
-    @Override
-    protected void onHitBlock(BlockHitResult pResult) {
-        BlockState blockState = this.level.getBlockState(pResult.getBlockPos());
-        if (blockState.getBlock() != Blocks.WATER) {
-            this.discard();
-        }
-    }
-
-    @Override
-    protected void onHit(HitResult hitResult) {
-        HitResult.Type hitresult$type = hitResult.getType();
-        if (hitresult$type == HitResult.Type.BLOCK) {
-            BlockHitResult blockhitresult = (BlockHitResult)hitResult;
-            this.onHitBlock(blockhitresult);
-        }
-
-    }
-    private void spawnParticles() {
-        if (this.level instanceof ServerLevel) {
-            ServerLevel serverLevel = (ServerLevel) this.level;
-            for (int i = 0; i < 25; ++i) {
-                double d0 = (this.random.nextDouble()) * this.getBbWidth();
-                double d1 = (this.random.nextDouble()) * this.getBbHeight();
-                double d2 = (this.random.nextDouble()) * this.getBbWidth();
-                serverLevel.sendParticles(ModParticles.GAIA_BLADE_PARTICLES.get(), this.getX(), this.getY()+(this.random.nextDouble()), this.getZ(), 1, d0, d1, d2, 1.0D);
-            }
-        }
-    }
-
-    @Override
-    public void remove(RemovalReason pReason) {
-        if (!this.level.isClientSide && pReason == RemovalReason.DISCARDED) {
-            spawnParticles();
-        }
-        super.remove(pReason);
+        this.setYRot(player.getYRot());
+        this.setXRot(player.getXRot());
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
+        this.setInvisible(true);
     }
 
     @Override
     protected void defineSynchedData() {
-        this.entityData.define(HIT, false);
+        super.defineSynchedData();
+        this.entityData.define(IS_RETURNING, false);
+        this.entityData.define(IS_UPGRADED, false);
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+    public void tick() {
+        super.baseTick();
+        if (this.tickCount > 1 && this.isInvisible()) {
+            this.setInvisible(false);
+        }
+
+        if (!this.level().isClientSide && this.tickCount >= 12 && !this.entityData.get(IS_RETURNING)) {
+            if (isUpgraded) {
+                this.entityData.set(IS_RETURNING, true);
+                this.piercedEntities.clear();
+            } else {
+                spawnDiscardParticles();
+                this.discard();
+                return;
+            }
+        }
+
+        boolean returning = this.entityData.get(IS_RETURNING);
+        Vec3 currentPos = this.position();
+        Vec3 nextPos;
+
+        if (returning && this.getOwner() instanceof Player player) {
+            Vec3 target = player.position().add(0, 1.2, 0);
+            double distToTarget = currentPos.distanceTo(target);
+
+            if (distToTarget < 1.4) {
+                spawnDiscardParticles();
+                this.discard();
+                return;
+            }
+            Vec3 dirToPlayer = target.subtract(currentPos).normalize();
+            nextPos = currentPos.add(dirToPlayer.scale(1.2));
+        } else {
+            nextPos = currentPos.add(this.flightDirection);
+            this.flightDirection = this.flightDirection.scale(0.95);
+        }
+
+        BlockHitResult blockHit = this.level().clip(new ClipContext(currentPos, nextPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+        if (blockHit.getType() != HitResult.Type.MISS) {
+            this.setPos(blockHit.getLocation());
+
+            if (this.lastHitPos == null || blockHit.getLocation().distanceTo(this.lastHitPos) > 0.5D) {
+                this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.GAIA_HIT.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1.0f);
+                spawnDiscardParticles();
+                this.lastHitPos = blockHit.getLocation();
+            }
+
+            if (isUpgraded) {
+                this.entityData.set(IS_RETURNING, true);
+                this.piercedEntities.clear();
+                this.flightDirection = Vec3.ZERO;
+
+                if (returning) {
+                    this.discard();
+                }
+            } else {
+                this.discard();
+            }
+            return;
+        }
+
+        Vec3 moveVec = nextPos.subtract(currentPos);
+        if (moveVec.lengthSqr() > 1.0E-7D) {
+            this.setYRot((float) (Mth.atan2(moveVec.x, moveVec.z) * (180D / Math.PI)));
+            this.setXRot((float) (Mth.atan2(moveVec.y, moveVec.horizontalDistance()) * (180D / Math.PI)));
+            this.yRotO = this.getYRot();
+            this.xRotO = this.getXRot();
+        }
+
+        this.xo = this.getX();
+        this.yo = this.getY();
+        this.zo = this.getZ();
+        this.setPos(nextPos.x, nextPos.y, nextPos.z);
+
+        if (!this.level().isClientSide) {
+            this.checkCollisions();
+        } else {
+            this.level().addParticle(ParticleTypes.HAPPY_VILLAGER, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
+        }
+    }
+
+    @Override
+    protected ItemStack getPickupItem() {
+        return null;
+    }
+
+    public boolean isUpgraded() {
+        return this.entityData.get(IS_UPGRADED);
+    }
+
+    private void spawnDiscardParticles() {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getX(), this.getY(), this.getZ(), 15, 0.2D, 0.2D, 0.2D, 0.05D);
+        }
+    }
+
+    private void checkCollisions() {
+        Vec3 currentPos = this.position();
+        Vec3 movement = this.flightDirection;
+
+        if (this.entityData.get(IS_RETURNING) && this.getOwner() instanceof Player player) {
+            movement = player.position().add(0, 1.2, 0).subtract(currentPos).normalize().scale(1.2);
+        }
+
+        AABB travelBox = this.getBoundingBox().expandTowards(movement).inflate(0.8D);
+        List<Entity> targets = this.level().getEntities(this, travelBox, this::canHitEntity);
+
+        for (Entity target : targets) {
+            if (this.getOwner() instanceof Player player) {
+                if (target == player) continue;
+
+                if (!this.piercedEntities.contains(target)) {
+                    if (target.getBoundingBox().inflate(0.3D).clip(currentPos, currentPos.add(movement)).isPresent()
+                            || this.getBoundingBox().inflate(0.8D).intersects(target.getBoundingBox())) {
+                        if (target.hurt(this.damageSources().arrow(this,player), this.swordDamage)) {
+                            this.piercedEntities.add(target);
+                            ItemStack mainHand = player.getMainHandItem();
+                            if (mainHand.getItem() instanceof GaiaBladeItem) {
+                                GaiaBladeItem.addUpgradeAmount(mainHand, 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

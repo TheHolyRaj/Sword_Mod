@@ -2,5 +2,13 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "rajswordmod:item/shadow_clone_sword"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "upgraded": 1.0
+      },
+      "model": "rajswordmod:item/shadow_clone_sword_upgraded"
+    }
+  ]
 }

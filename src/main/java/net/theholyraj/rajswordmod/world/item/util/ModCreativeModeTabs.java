@@ -3,11 +3,14 @@ package net.theholyraj.rajswordmod.world.item.util;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import net.theholyraj.rajswordmod.SwordMod;
+import net.theholyraj.rajswordmod.world.enchantment.ModEnchantments;
 import net.theholyraj.rajswordmod.world.item.ModItems;
 
 public class ModCreativeModeTabs {
@@ -27,6 +30,21 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.ANTI_ARMOR_SWORD.get());
                         output.accept(ModItems.SHADOW_CLONE_SWORD.get());
 
+                        for (int i = 1; i <= ModEnchantments.ARMOURED.get().getMaxLevel(); i++) {
+                            output.accept(EnchantedBookItem.createForEnchantment(
+                                    new EnchantmentInstance(ModEnchantments.ARMOURED.get(), i)
+                            ));
+                        }
+                        for (int i = 1; i <= ModEnchantments.REACH.get().getMaxLevel(); i++) {
+                            output.accept(EnchantedBookItem.createForEnchantment(
+                                    new EnchantmentInstance(ModEnchantments.REACH.get(), i)
+                            ));
+                        }
+                        for (int i = 1; i <= ModEnchantments.BACKSTABBER.get().getMaxLevel(); i++) {
+                            output.accept(EnchantedBookItem.createForEnchantment(
+                                    new EnchantmentInstance(ModEnchantments.BACKSTABBER.get(), i)
+                            ));
+                        }
                     }).build());
 
 

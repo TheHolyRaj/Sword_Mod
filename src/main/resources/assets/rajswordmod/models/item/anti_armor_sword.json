@@ -6,9 +6,24 @@
   "overrides": [
     {
       "predicate": {
-        "blocking": 1
+        "upgraded": 0.0,
+        "blocking": 1.0
       },
-      "model": "rajswordmod:item/anti_armor_blocking"
+      "model": "rajswordmod:item/anti_armor_sword_blocking"
+    },
+    {
+      "predicate": {
+        "upgraded": 1.0,
+        "blocking": 0.0
+      },
+      "model": "rajswordmod:item/anti_armor_sword_upgraded"
+    },
+    {
+      "predicate": {
+        "upgraded": 1.0,
+        "blocking": 1.0
+      },
+      "model": "rajswordmod:item/anti_armor_sword_upgraded_blocking"
     }
   ]
 }
