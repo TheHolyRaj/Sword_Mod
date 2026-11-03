@@ -1,0 +1,19 @@
+{
+  "parent": "rajswordmod:item/anti_armor_sword",
+  "gui_light": "front",
+  "textures": {
+    "layer0": "rajswordmod:item/anti_armor_sword"
+  },
+  "display": {
+    "firstperson_righthand": {
+      "rotation": [ -70, 0, 45 ],
+      "translation": [ -9, 6, 0 ],
+      "scale": [ 0.75, 0.75, 0.75 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ -70, 0, -45 ],
+      "translation": [ -9, 6, 0 ],
+      "scale": [ 0.75, 0.75, 0.75 ]
+    }
+  }
+}
